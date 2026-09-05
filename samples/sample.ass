@@ -1,0 +1,20 @@
+[Script Info]
+; Sample for the Kurdish Sorani Subtitle Translator
+Title: Sample
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,80,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,2,2,10,10,10,1
+Style: Sign,Impact,64,&H0000FFFF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,2,0,8,10,10,10,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:01.00,0:00:04.00,Default,,0,0,0,,Welcome to Erbil.
+Dialogue: 0,0:00:05.00,0:00:08.00,Default,Narrator,0,0,0,,{\an8}The citadel has stood here for thousands of years.
+Dialogue: 1,0:00:09.00,0:00:12.00,Sign,,0,0,0,,{\i1}A sign in two lines\Nof Kurdish text
+Comment: 0,0:00:13.00,0:00:14.00,Default,,0,0,0,,This comment event is preserved as metadata

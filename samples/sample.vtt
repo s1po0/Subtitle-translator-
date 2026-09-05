@@ -1,0 +1,14 @@
+WEBVTT - Sample for the Kurdish Sorani Subtitle Translator
+
+NOTE
+  Cue settings below are preserved on export.
+
+intro
+00:00:01.000 --> 00:00:04.000 align:middle position:50%
+Good morning, everyone.
+
+00:00:05.500 --> 00:00:08.000 line:90%
+Please take your seats.
+
+00:00:09.000 --> 00:00:12.500 align:start
+<b>Thank you</b> for coming.

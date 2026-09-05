@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Theme tokens: a blue/teal scheme, with teal reserved for actions that
+ * produce or confirm an outcome (export, save, success) and blue for
+ * navigation and general structure.
+ * ------------------------------------------------------------------ */
+
+@theme {
+  --color-brand-50: #eef6ff;
+  --color-brand-100: #d9ebff;
+  --color-brand-200: #bcdcff;
+  --color-brand-300: #8ec6ff;
+  --color-brand-400: #59a5fb;
+  --color-brand-500: #3384f4;
+  --color-brand-600: #1d65e8;
+  --color-brand-700: #1750d5;
+  --color-brand-800: #1943ad;
+  --color-brand-900: #1a3c89;
+  --color-brand-950: #152654;
+
+  --color-accent-50: #effefa;
+  --color-accent-100: #c8fff1;
+  --color-accent-200: #91ffe4;
+  --color-accent-300: #52f7d4;
+  --color-accent-400: #1ee2bf;
+  --color-accent-500: #06c6a5;
+  --color-accent-600: #02a089;
+  --color-accent-700: #077f6f;
+  --color-accent-800: #0b6459;
+  --color-accent-900: #0e524a;
+  --color-accent-950: #01322e;
+
+  --font-sorani: "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+
+/* ------------------------------------------------------------------ *
+ * Base
+ * ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    /* The interface itself is LTR; individual fields opt into RTL. */
+    direction: ltr;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+  }
+
+  /* Visible focus everywhere, as required for keyboard navigation. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* A distinct ring for elements sitting on a dark surface. */
+  .on-dark:focus-visible {
+    outline-color: var(--color-accent-300);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Components
+ * ------------------------------------------------------------------ */
+
+@layer components {
+  /* Shared button base. Written as a grouped selector rather than a `.btn`
+     class that others `@apply`, because Tailwind v4 only resolves real
+     utilities inside `@apply`. */
+  .btn-primary,
+  .btn-accent,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2
+           text-sm font-medium transition
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+
+  .btn-accent {
+    @apply bg-accent-600 text-white hover:bg-accent-700 active:bg-accent-800;
+  }
+
+  .btn-secondary {
+    @apply border border-slate-300 bg-white text-slate-700
+           hover:border-brand-400 hover:text-brand-700;
+  }
+
+  .btn-ghost {
+    @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  .btn-danger {
+    @apply border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+  }
+
+  /* Declared after the variants so its padding and text size win. */
+  .btn-sm {
+    @apply px-2.5 py-1.5 text-xs;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2
+           text-sm text-slate-900 shadow-sm
+           placeholder:text-slate-400
+           hover:border-slate-400
+           disabled:bg-slate-100 disabled:text-slate-500;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+
+  .hint {
+    @apply mt-1 text-xs text-slate-500;
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5
+           text-xs font-medium;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Right-to-left subtitle editing
+ * ------------------------------------------------------------------ */
+
+@layer utilities {
+  .rtl-field {
+    direction: rtl;
+    text-align: right;
+    font-family: var(--font-sorani);
+  }
+
+  .subtitle-text {
+    font-family: var(--font-sorani);
+    line-height: 1.9;
+  }
+
+  /* Keeps long lists cheap to render without windowing logic. */
+  .row-perf {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 220px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Preview panel: a mock video frame
+ * ------------------------------------------------------------------ */
+
+.preview-frame {
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.12), transparent 60%),
+    linear-gradient(160deg, #0f172a 0%, #132a3d 55%, #0c3b45 100%);
+}
+
+/* Respect users who prefer less motion. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

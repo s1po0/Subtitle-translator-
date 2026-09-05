@@ -1,0 +1,20 @@
+1
+00:00:01,000 --> 00:00:04,000
+Hello, how are you?
+
+2
+00:00:05,500 --> 00:00:08,000
+I have been waiting for you.
+
+3
+00:00:09,000 --> 00:00:12,500
+<i>The mountains look beautiful today.</i>
+
+4
+00:00:13,000 --> 00:00:16,000
+Come, let us drink tea
+and talk for a while.
+
+5
+00:00:17,000 --> 00:00:20,000
+Thank you, my friend.
