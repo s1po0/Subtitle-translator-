@@ -9,6 +9,9 @@ import { PreviewPanel } from "@/components/PreviewPanel";
 import { ProgressBar } from "@/components/ProgressBar";
 import { SubtitleRow } from "@/components/SubtitleRow";
 import { FORMATS } from "@/lib/formats";
+import { useNeural } from "@/lib/neural/context";
+import { canNeuralTranslate, sourceLanguageProblem } from "@/lib/neural/languages";
+import { NeuralEnginePanel } from "@/components/NeuralEnginePanel";
 import { SOURCE_LANGUAGES } from "@/lib/languages";
 import { copyText } from "@/lib/clipboard";
 import { useProject, type ReplaceScope } from "@/lib/project-context";
@@ -45,6 +48,7 @@ export default function TranslatorPage() {
 
   const { settings } = useSettings();
   const { notify } = useToast();
+  const neural = useNeural();
 
   const [showExport, setShowExport] = useState(false);
   const [showReplace, setShowReplace] = useState(false);
@@ -52,6 +56,7 @@ export default function TranslatorPage() {
   const [replaceWith, setReplaceWith] = useState("");
   const [scope, setScope] = useState<ReplaceScope>("translation");
   const [dismissedWarnings, setDismissedWarnings] = useState(false);
+  const [drafting, setDrafting] = useState<Set<number>>(new Set());
 
   const progress = useMemo(() => translationProgress(entries), [entries]);
   const untranslatedCount = progress.total - progress.translated;
@@ -72,6 +77,67 @@ export default function TranslatorPage() {
   }
 
   const format = FORMATS[doc.format];
+
+  const neuralReady = neural.state === "ready";
+  const neuralBlockedReason = canNeuralTranslate(doc.sourceLanguage)
+    ? null
+    : sourceLanguageProblem(doc.sourceLanguage);
+  const canDraft = neuralReady && neuralBlockedReason === null;
+
+  const markDrafting = (id: number, on: boolean) => {
+    setDrafting((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  /** Draft one subtitle. Fills the field; the user still reviews it. */
+  const handleDraft = async (id: number) => {
+    const target = entries.find((e) => e.id === id);
+    if (!target) return;
+    markDrafting(id, true);
+    try {
+      const text = await neural.draft(target.original_text, doc.sourceLanguage);
+      setTranslation(id, text);
+      notify("success", `Drafted subtitle ${target.index}`, "Review it before exporting.");
+    } catch (err) {
+      notify("error", "Drafting failed", err instanceof Error ? err.message : undefined);
+    } finally {
+      markDrafting(id, false);
+    }
+  };
+
+  /** Draft every subtitle that has no translation yet, reporting progress. */
+  const handleDraftAll = async () => {
+    const pending = entries.filter((e) => e.translated_text.trim() === "");
+    if (pending.length === 0) {
+      notify("info", "Nothing to draft", "Every subtitle already has a translation.");
+      return;
+    }
+    markDrafting(-1, true);
+    let done = 0;
+    let failed = 0;
+    for (const target of pending) {
+      try {
+        const text = await neural.draft(target.original_text, doc.sourceLanguage);
+        setTranslation(target.id, text);
+      } catch {
+        failed += 1;
+      }
+      done += 1;
+      if (done % 5 === 0 || done === pending.length) {
+        notify("info", `Drafted ${done} of ${pending.length} subtitles`);
+      }
+    }
+    markDrafting(-1, false);
+    notify(
+      failed === 0 ? "success" : "warning",
+      `Drafting finished: ${done - failed} translated`,
+      failed > 0 ? `${failed} subtitle(s) could not be drafted.` : "Review the results before exporting.",
+    );
+  };
 
   const handleCopyAll = async () => {
     const targetIds = selection.size > 0 ? selection : new Set(entries.map((e) => e.id));
@@ -269,6 +335,22 @@ export default function TranslatorPage() {
 
           <span aria-hidden="true" className="h-5 w-px bg-slate-200" />
 
+          <button
+            type="button"
+            className="btn-primary btn-sm"
+            onClick={() => void handleDraftAll()}
+            disabled={!canDraft || drafting.size > 0}
+            title={
+              !neuralReady
+                ? "Enable the neural engine in Settings to draft translations"
+                : (neuralBlockedReason ?? "Draft every untranslated subtitle locally")
+            }
+          >
+            {drafting.has(-1) ? "Drafting…" : "Draft all untranslated"}
+          </button>
+
+          <span aria-hidden="true" className="h-5 w-px bg-slate-200" />
+
           <button type="button" className="btn-secondary btn-sm" onClick={() => void handleCopyAll()}>
             ⧉ Copy originals{selection.size > 0 ? ` (${selection.size})` : " (all)"}
           </button>
@@ -388,6 +470,8 @@ export default function TranslatorPage() {
                   onSplit={splitEntry}
                   onMerge={mergeWithNext}
                   onToggleSelect={toggleSelect}
+                  onDraft={canDraft ? (id) => void handleDraft(id) : undefined}
+                  isDrafting={drafting.has(entry.id) || drafting.has(-1)}
                 />
               ))}
             </ul>
@@ -416,6 +500,18 @@ export default function TranslatorPage() {
           </section>
         </aside>
       </div>
+
+      {neural.enabled && neuralBlockedReason !== null && (
+        <section className="card mt-4 border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          {neuralBlockedReason}
+        </section>
+      )}
+
+      {neural.enabled && (
+        <div className="mt-4">
+          <NeuralEnginePanel />
+        </div>
+      )}
 
       {showExport && <ExportDialog doc={doc} onClose={() => setShowExport(false)} />}
     </div>

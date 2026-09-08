@@ -116,6 +116,11 @@ export interface AppSettings {
   /** Keep two-line cues as two lines on export. */
   maxLinesPerCue: number;
   autoSave: boolean;
+  /**
+   * Opt-in local neural translation engine. Off by default: while false, the
+   * runtime is never imported and no model weights are downloaded.
+   */
+  neuralEngineEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -127,6 +132,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   lineBreakPreference: "original",
   maxLinesPerCue: 2,
   autoSave: true,
+  neuralEngineEnabled: false,
 };
 
 export function isTranslated(entry: SubtitleEntry): boolean {

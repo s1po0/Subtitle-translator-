@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Dropzone } from "@/components/Dropzone";
+import { NeuralEnginePanel } from "@/components/NeuralEnginePanel";
 import { FORMAT_LIST, FORMATS } from "@/lib/formats";
 import { SOURCE_LANGUAGES } from "@/lib/languages";
 import {
@@ -230,6 +231,8 @@ export default function SettingsPage() {
             </label>
           </div>
         </section>
+
+        <NeuralEnginePanel />
 
         <section className="card p-6">
           <h2 className="text-lg font-semibold text-slate-900">Saved projects</h2>

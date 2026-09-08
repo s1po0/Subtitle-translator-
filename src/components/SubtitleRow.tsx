@@ -17,6 +17,9 @@ export interface SubtitleRowHandlers {
   onSplit: (id: number) => void;
   onMerge: (id: number) => void;
   onToggleSelect: (id: number) => void;
+  /** Present only when the neural engine can draft for this project. */
+  onDraft?: (id: number) => void;
+  isDrafting?: boolean;
 }
 
 interface Props extends SubtitleRowHandlers {
@@ -45,6 +48,8 @@ export function SubtitleRow({
   onSplit,
   onMerge,
   onToggleSelect,
+  onDraft,
+  isDrafting,
 }: Props) {
   const { notify } = useToast();
   const [busy, setBusy] = useState<"copy" | "paste" | null>(null);
@@ -229,14 +234,27 @@ export function SubtitleRow({
               Kurdish Sorani
               <span className="ml-2 text-xs font-normal text-slate-500">کوردیی سۆرانی</span>
             </label>
-            <button
-              type="button"
-              className="btn-accent btn-sm"
-              onClick={() => void handlePaste()}
-              disabled={busy === "paste"}
-            >
-              {busy === "paste" ? "Pasting…" : "Paste translation"}
-            </button>
+            <div className="flex items-center gap-1">
+              {onDraft && (
+                <button
+                  type="button"
+                  className="btn-secondary btn-sm"
+                  onClick={() => onDraft(entry.id)}
+                  disabled={isDrafting}
+                  title="Draft a Sorani translation locally with the neural engine"
+                >
+                  {isDrafting ? "Drafting…" : "Draft with AI"}
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn-accent btn-sm"
+                onClick={() => void handlePaste()}
+                disabled={busy === "paste"}
+              >
+                {busy === "paste" ? "Pasting…" : "Paste translation"}
+              </button>
+            </div>
           </div>
           <textarea
             id={`translated-${entry.id}`}

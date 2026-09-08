@@ -9,12 +9,18 @@ browser. The app deliberately contains no translation engine: you copy the
 original text out, translate it with whatever tool you prefer, and paste the
 Sorani back in.
 
-## Why manual
+## Two ways to get a translation
 
-Machine output for Kurdish Sorani is unreliable, and this project does not
-integrate Google Translate, any other translation API, or any scraping of a
-translation website. Instead the interface is built around a copy/paste
-workflow so a human stays in control of the wording.
+**Manual (default).** Copy the original text out, translate it with whatever
+tool you prefer, paste the Sorani back in. A human stays in control of the
+wording, and the app makes no network requests at all.
+
+**Neural engine (opt-in).** A local NLLB-200 model drafts the Sorani for you.
+It runs on your device — no API key, no server — and is off until you enable
+it in Settings. See below.
+
+Either way, this project integrates no translation API and does no scraping of
+any translation website.
 
 ## Quick start
 
@@ -32,6 +38,11 @@ npm run serve      # serves ./out on http://0.0.0.0:3000
 
 Because the build is `output: "export"`, you can also drop the `out/`
 directory onto any static host, or open it directly.
+
+> `@huggingface/transformers` pulls in `onnxruntime-node`, whose postinstall
+> fetches a prebuilt native binary. If your network blocks that host, install
+> with `npm install --ignore-scripts` — the browser build only needs
+> `onnxruntime-web`, so the app still builds and runs.
 
 ## Supported formats
 
@@ -61,6 +72,45 @@ are common.
 Kurdish Sorani is Arabic script. EBU STL uses a Latin character table and
 SCC/MCC use the EIA-608 ASCII set, so **neither can store Sorani**. The export
 dialog says so before you download, rather than handing you a broken file.
+
+## Neural engine (optional)
+
+An embedded NLLB-200 (600M parameter) translation model, run locally through
+transformers.js. It drafts Kurdish Sorani; you still review every line.
+
+| | |
+| --- | --- |
+| Model | `Xenova/nllb-200-distilled-600M` |
+| Size | ≈ 242 MB, downloaded once and cached by the browser |
+| Target | `ckb_Arab` — Central Kurdish, Arabic script |
+| Runtime | ONNX via WebAssembly; WebGPU when available, CPU otherwise |
+| Default | **Off.** Nothing is imported or downloaded until you enable it |
+
+Enable it in **Settings → Neural engine**, then use **Draft with AI** on a
+subtitle or **Draft all untranslated** in the toolbar. Drafts land in the
+translation field as editable text. The copy/paste buttons remain, so the
+manual workflow is untouched.
+
+The engine needs a concrete source language — NLLB cannot auto-detect — so the
+draft buttons stay disabled while the source is set to "Auto-detect", with an
+explanation shown rather than a silent no-op.
+
+### Why not a larger model
+
+Large models were evaluated and rejected on hard numbers, not preference:
+
+- **Qwen 27B** (Q4_K_M) is a 16.8 GB download needing **~18.9 GB of memory**.
+  A browser tab has far less than a whole machine, so it cannot run there.
+- **Gemma 4 26B A4B** needs 14–18 GB; **Gemma 4 31B** needs ~20 GB.
+- The practical ceiling for in-browser LLMs is **~8B parameters quantized**,
+  against 4–6 GB of usable GPU memory.
+- **Browsers do not run GGUF.** That is llama.cpp's container format; browser
+  runtimes use MLC-compiled artifacts (WebLLM) or ONNX (transformers.js).
+
+Gemma 4's **E2B** tier (~3 GB at 4-bit) would fit on a good machine, but NLLB
+is the better fit here: it is a dedicated translation model rather than a chat
+model prompted to translate, it is eight times smaller, it needs no WebGPU, and
+it was trained on Kurdish.
 
 ## Features
 
@@ -112,8 +162,14 @@ export. Format-specific detail lives in `style` (per entry) and `formatMeta`
 
 ## Security and privacy
 
-- Files are read with the File API and parsed in-browser. **No network
-  requests** are made for subtitle content — the app has no fetch calls at all.
+- Files are read with the File API and parsed in-browser. **Subtitle content is
+  never sent anywhere.** There are no `fetch`, XHR, WebSocket or `sendBeacon`
+  calls anywhere in `src/`.
+- The only network-capable code is a single lazy
+  `await import("@huggingface/transformers")` in `src/lib/neural/engine.ts`.
+  It runs **only** if you enable the neural engine, and the only thing it
+  retrieves is model weights — never subtitle text. With the engine off (the
+  default), the app makes no network requests at all.
 - No API keys, no environment secrets, no analytics.
 - Previews render markup through an allowlist sanitiser (`src/lib/sanitize.ts`)
   that **rebuilds** tags from parsed names and filtered attributes rather than
@@ -136,6 +192,7 @@ src/
       eia608.ts      EIA-608 character coding shared by SCC and MCC
     clipboard.ts     copy/paste with a non-secure-context fallback
     history.ts       snapshot-based undo/redo
+    neural/          opt-in local NLLB engine (lazy-loaded, testable loader)
     languages.ts     source-language list, script-direction detection
     project-context.tsx
     sanitize.ts      markup allowlist
@@ -143,21 +200,28 @@ src/
     storage.ts       localStorage persistence
     time.ts          timestamp / frame / SMPTE timecode conversion
     types.ts         the normalised subtitle model
-tests/               136 tests across the parsers, sanitiser and time helpers
+tests/               159 tests across the parsers, sanitiser and time helpers
 scripts/serve.mjs    tiny static server for out/
 ```
 
 ## Tests
 
 ```bash
-npm test           # vitest, 136 tests
+npm test           # vitest, 159 tests
 npm run typecheck  # tsc --noEmit
 ```
 
 The suite covers each parser and exporter (including round trips), format
 detection, the sanitiser's XSS handling, timestamp and timecode conversion,
-EIA-608 coding, and a hand-constructed binary STL file so the STL parser is
-tested independently of its own exporter.
+EIA-608 coding, a hand-constructed binary STL file so the STL parser is tested
+independently of its own exporter, and the neural engine's lifecycle, language
+mapping and error paths.
+
+The neural engine is tested through an injected model loader, so its state
+machine, language mapping, markup stripping and error handling are all covered
+**without downloading weights**. Actual inference is not covered by the suite
+and has not been verified in the development sandbox, where `huggingface.co` is
+unreachable.
 
 ## Known limitations
 
