@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SUB//LATE — Realtime subtitle translator</title>
+    <meta
+      name="description"
+      content="Cinematic browser-based subtitle translator. Load SRT/VTT, translate with your own provider, export in seconds."
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305070d'/%3E%3Cpath d='M7 21h18M7 16h12M7 11h18' stroke='%2322d3ee' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <canvas id="backdrop" aria-hidden="true"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span class="brand-name">SUB<span class="slash">//</span>LATE</span>
+      </a>
+      <div class="topbar-meta">
+        <span class="pill" id="fps-pill" title="Render performance">GPU · —</span>
+        <span class="pill ghost" id="cue-pill">0 cues</span>
+        <button class="icon-btn" id="settings-btn" type="button" aria-haspopup="dialog">
+          <span aria-hidden="true">⚙</span>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Realtime subtitle pipeline · لێرە بەردەستە</p>
+        <h1>
+          Translate subtitles<br />
+          <span class="gradient-text">without leaving the browser.</span>
+        </h1>
+        <p class="lede">
+          Drop an <strong>SRT</strong> or <strong>WebVTT</strong> file, pick a provider you control, and
+          export a timed translation in seconds. Every request goes straight from your tab to the
+          provider — no server in the middle.
+        </p>
+        <div class="hero-actions">
+          <button class="primary-btn" id="hero-load" type="button">
+            Load subtitle file
+            <span class="kbd">⌘O</span>
+          </button>
+          <button class="ghost-btn" id="sample-btn" type="button">Try a sample</button>
+        </div>
+      </section>
+
+      <section class="workspace" id="workspace">
+        <div class="panel">
+          <div class="controls">
+            <div class="control-group">
+              <label class="control">
+                <span>Source · سەرچاوە</span>
+                <select id="source-lang"></select>
+              </label>
+              <span class="arrow" aria-hidden="true">→</span>
+              <label class="control">
+                <span>Target · ئامانج</span>
+                <select id="target-lang"></select>
+              </label>
+            </div>
+
+            <label class="control grow">
+              <span>Engine · بزوێنەر</span>
+              <select id="provider"></select>
+            </label>
+
+            <div class="control-actions">
+              <button class="primary-btn compact" id="translate-btn" type="button" disabled>
+                Translate
+              </button>
+              <button class="ghost-btn compact" id="stop-btn" type="button" hidden>Stop</button>
+            </div>
+          </div>
+
+          <p class="provider-hint" id="provider-hint"></p>
+
+          <div class="progress" id="progress" hidden>
+            <div class="progress-bar"><span id="progress-fill"></span></div>
+            <span class="progress-label" id="progress-label">0 / 0</span>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="drop-zone" id="drop-zone" tabindex="0" role="button">
+              <div class="drop-icon" aria-hidden="true">⇧</div>
+              <p class="drop-title">Drop an .srt or .vtt file here</p>
+              <p class="drop-sub">یان کلیک بکە بۆ هەڵبژاردنی فایل · or paste subtitle text below</p>
+              <textarea
+                id="paste-area"
+                class="paste-area"
+                rows="3"
+                spellcheck="false"
+                placeholder="1&#10;00:00:01,000 --> 00:00:03,000&#10;Hello world"
+                aria-label="Paste subtitle text"
+              ></textarea>
+              <button class="ghost-btn compact" id="paste-btn" type="button">Parse pasted text</button>
+            </div>
+          </div>
+
+          <div class="editor" id="editor" hidden>
+            <div class="editor-head">
+              <div class="file-meta">
+                <span class="file-name" id="file-name">untitled.srt</span>
+                <span class="dot" aria-hidden="true">•</span>
+                <span id="file-stats">0 cues · 00:00</span>
+              </div>
+              <div class="editor-actions">
+                <button class="ghost-btn compact" id="load-btn" type="button">Load another</button>
+                <button class="ghost-btn compact" id="clear-btn" type="button">Clear</button>
+              </div>
+            </div>
+
+            <div class="table-head" aria-hidden="true">
+              <span>Timecode</span>
+              <span>Original</span>
+              <span>Translation</span>
+            </div>
+
+            <div class="cue-list" id="cue-list" role="list"></div>
+          </div>
+
+          <div class="footer-actions" id="footer-actions" hidden>
+            <button class="primary-btn compact" id="export-srt" type="button">Export SRT</button>
+            <button class="ghost-btn compact" id="export-vtt" type="button">Export VTT</button>
+            <button class="ghost-btn compact" id="copy-btn" type="button">Copy translation</button>
+            <span class="spacer"></span>
+            <span class="counts" id="counts"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="cards">
+        <article class="card">
+          <h2>Why not Unreal?</h2>
+          <p>
+            Unreal needs a GPU workstation, a ~100&nbsp;GB install and has no official HTML5 export
+            since 4.24 — it cannot run inside a container like this one. This scene reproduces the
+            look with three.js: PBR materials, exponential fog, bloom and a cinematic camera rig.
+          </p>
+        </article>
+        <article class="card">
+          <h2>Your keys stay yours</h2>
+          <p>
+            Settings are saved in this browser's <code>localStorage</code>. Translations travel
+            directly from your tab to the provider you select — there is no backend to log them.
+          </p>
+        </article>
+        <article class="card">
+          <h2>Broadcast-ready output</h2>
+          <p>
+            Cue timings are preserved to the millisecond, line breaks are kept, and exported SRT/VTT
+            re-parse cleanly in players like VLC, mpv, Premiere and DaVinci Resolve.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>SUB//LATE · built for editors who ship</span>
+      <span class="mono" id="status-line">ready</span>
+    </footer>
+
+    <input type="file" id="file-input" accept=".srt,.vtt,.txt,text/plain" hidden />
+
+    <dialog id="settings-dialog" class="settings">
+      <form method="dialog" class="settings-form">
+        <header class="settings-head">
+          <h2>Settings · ڕێکخستن</h2>
+          <button class="icon-btn" value="close" aria-label="Close settings">✕</button>
+        </header>
+
+        <fieldset>
+          <legend>LLM provider</legend>
+          <label class="field">
+            <span>Endpoint</span>
+            <input id="llm-url" type="url" placeholder="https://api.openai.com/v1/chat/completions" />
+          </label>
+          <label class="field">
+            <span>Model</span>
+            <input id="llm-model" type="text" placeholder="gpt-4o-mini" />
+          </label>
+          <label class="field">
+            <span>API key <small>(stored locally, never sent anywhere else)</small></span>
+            <input id="llm-key" type="password" autocomplete="off" placeholder="sk-…" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>LibreTranslate</legend>
+          <label class="field">
+            <span>Instance URL</span>
+            <input id="lt-url" type="url" placeholder="https://libretranslate.com" />
+          </label>
+          <label class="field">
+            <span>API key <small>(optional)</small></span>
+            <input id="lt-key" type="password" autocomplete="off" />
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Glossary</legend>
+          <label class="field">
+            <span>One term per line — <code>term = translation</code></span>
+            <textarea id="glossary" rows="3" placeholder="lightsaber = شمشێری ڕووناکی"></textarea>
+          </label>
+        </fieldset>
+
+        <div class="settings-actions">
+          <button class="ghost-btn" value="close" type="submit">Cancel</button>
+          <button class="primary-btn" id="save-settings" value="save" type="button">Save settings</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
