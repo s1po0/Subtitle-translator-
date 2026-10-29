@@ -16,6 +16,12 @@ export default defineConfig({
     allowedHosts: ['.e2b.app', 'localhost', '127.0.0.1'],
   },
   build: {
-    chunkSizeWarningLimit: 900,
+    chunkSizeWarningLimit: 2200,
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        unreal: 'unreal.html',
+      },
+    },
   },
 });

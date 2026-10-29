@@ -8,6 +8,7 @@ import {
 } from './subtitles.js';
 import { LANGUAGES, PROVIDERS, translateCues } from './translate.js';
 import { initGodotHost } from './godot-host.js';
+import { createUnrealLab } from './unreal.js';
 
 const STORAGE_KEY = 'sublate.settings.v1';
 const RTL_LANGS = new Set(['ku', 'ckb', 'ar', 'fa', 'he', 'ur']);
@@ -612,6 +613,19 @@ function setStatus(message) {
 }
 
 initGodotHost({ toast, setStatus });
+
+const unrealLab = createUnrealLab({
+  container: $('#unreal-player'),
+  urlInput: $('#unreal-url'),
+  connectBtn: $('#unreal-connect'),
+  disconnectBtn: $('#unreal-disconnect'),
+  statusPill: $('#unreal-status'),
+  logList: $('#unreal-log'),
+  standaloneLink: $('#unreal-standalone'),
+  toast,
+  setStatus,
+});
+void unrealLab;
 
 window.addEventListener('beforeunload', (event) => {
   if (state.translating) {

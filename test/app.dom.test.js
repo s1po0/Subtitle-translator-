@@ -88,6 +88,24 @@ test('godot build list renders the bundled build', async () => {
   assert.match(items[0].textContent, /built-in/);
 });
 
+test('unreal lab validates the URL and fails gracefully without WebRTC', async () => {
+  const input = window.document.querySelector('#unreal-url');
+  const button = window.document.querySelector('#unreal-connect');
+  const pill = window.document.querySelector('#unreal-status');
+
+  input.value = 'ftp://nope';
+  button.click();
+  await wait(20);
+  assert.equal(pill.textContent, 'idle', 'invalid input never starts a connection');
+
+  input.value = 'localhost:8888';
+  button.click();
+  await wait(400);
+  // jsdom exposes no WebRTC: the lab must report that and not crash the page.
+  assert.match(window.document.querySelector('#unreal-log').textContent, /no WebRTC|error/i);
+  assert.equal(pill.textContent, 'WebRTC unavailable');
+});
+
 test('clearing returns to the drop zone', async () => {
   window.document.querySelector('#clear-btn').click();
   await wait(20);

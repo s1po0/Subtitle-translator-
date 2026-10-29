@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UNREAL // Pixel Streaming player</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305070d'/%3E%3Ctext x='16' y='22' font-size='13' text-anchor='middle' fill='%2322d3ee' font-family='sans-serif' font-weight='bold'%3EUE%3C/text%3E%3C/svg%3E" />
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: #04060b; color: #e8f4fb;
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      body { display: grid; grid-template-rows: auto 1fr; }
+
+      header {
+        display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+        padding: 0.7rem 1rem; border-bottom: 1px solid rgba(120, 220, 255, 0.16);
+        background: rgba(8, 14, 21, 0.9);
+      }
+      header .mark {
+        font-weight: 800; letter-spacing: 0.18em; font-size: 0.8rem; color: #22d3ee;
+      }
+      header form { display: flex; gap: 0.5rem; flex: 1 1 320px; align-items: center; }
+      input {
+        flex: 1; min-width: 0; font: inherit; font-size: 0.85rem; color: inherit;
+        background: rgba(4, 10, 16, 0.85); border: 1px solid rgba(120, 220, 255, 0.25);
+        border-radius: 9px; padding: 0.5rem 0.65rem;
+      }
+      input:focus-visible { outline: none; border-color: #22d3ee; box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18); }
+      button, a.btn {
+        font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+        border-radius: 9px; padding: 0.5rem 0.9rem; border: 1px solid rgba(120, 220, 255, 0.3);
+        background: rgba(9, 17, 26, 0.75); color: inherit; text-decoration: none; white-space: nowrap;
+      }
+      button.primary { background: linear-gradient(120deg, #22d3ee, #a78bfa 60%, #f0abfc); color: #04121a; border-color: transparent; }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      #status { font-size: 0.72rem; color: #8fa6b8; letter-spacing: 0.08em; text-transform: uppercase; }
+
+      #player { position: relative; width: 100%; height: 100%; min-height: 0; background: #000; overflow: hidden; }
+      .idle { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center;
+        gap: 0.6rem; text-align: center; padding: 1.5rem; color: #8fa6b8; }
+      .idle strong { color: #e8f4fb; font-size: 1rem; }
+      .idle code { color: #67e8f9; font-size: 0.82rem; }
+      .idle .badge {
+        width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center;
+        border: 1px solid rgba(34, 211, 238, 0.35); color: #22d3ee; font-weight: 800; letter-spacing: 0.08em;
+        background: rgba(34, 211, 238, 0.06);
+      }
+      #player > div:not(.idle) { width: 100%; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="mark">UNREAL // PIXEL STREAMING</span>
+      <form id="connect-form">
+        <input
+          id="unreal-url"
+          type="text"
+          spellcheck="false"
+          autocomplete="off"
+          placeholder="ws://localhost:8888"
+          aria-label="Signalling server URL"
+        />
+        <button class="primary" type="submit" id="connect-btn">Connect</button>
+        <button type="button" id="disconnect-btn" disabled>Disconnect</button>
+      </form>
+      <a class="btn" href="/#unreal">← Back to SUB//LATE</a>
+      <span id="status">idle</span>
+    </header>
+
+    <main id="player">
+      <div class="idle">
+        <div class="badge">UE</div>
+        <strong>No Unreal Engine session attached</strong>
+        <p>
+          Point this player at a Pixel Streaming signalling server,<br />
+          e.g. <code>ws://localhost:8888</code> while UE runs on your own machine.
+        </p>
+      </div>
+    </main>
+
+    <script type="module" src="/src/unreal-page.js"></script>
+  </body>
+</html>

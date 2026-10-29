@@ -727,3 +727,125 @@ button:focus-visible,
   .godot-grid { grid-template-columns: 1fr; }
   .godot { padding: 1.1rem; }
 }
+
+/* ---------- unreal pixel streaming ---------- */
+
+.unreal {
+  margin-top: 3rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  background: linear-gradient(180deg, rgba(16, 12, 26, 0.82), rgba(6, 8, 14, 0.94));
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.unreal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 1rem;
+}
+
+.unreal-stage { display: grid; gap: 0.7rem; min-width: 0; }
+
+.unreal-frame-wrap {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  background:
+    radial-gradient(70% 70% at 50% 35%, rgba(167, 139, 250, 0.12), transparent 70%),
+    #04060b;
+}
+
+#unreal-player { width: 100%; height: 100%; }
+#unreal-player > div { width: 100%; height: 100%; }
+
+.unreal-idle { display: grid; place-items: center; text-align: center; padding: 1rem; }
+.unreal-idle-inner { display: grid; justify-items: center; gap: 0.5rem; }
+.unreal-idle p { margin: 0; font-weight: 600; }
+.unreal-idle .unreal-idle-sub { color: var(--muted); font-size: 0.76rem; font-weight: 400; }
+
+.unreal-mark {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #c4b5fd;
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  background: rgba(167, 139, 250, 0.08);
+}
+
+.unreal-connect {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.unreal-connect .control { min-width: 240px; }
+.unreal-connect input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; }
+
+.unreal-side { display: grid; gap: 0.7rem; align-content: start; min-width: 0; }
+
+.unreal-card {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  background: rgba(6, 10, 18, 0.55);
+  padding: 0.85rem 0.95rem;
+}
+.unreal-card h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+
+.unreal-steps { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.5rem; }
+.unreal-steps li { font-size: 0.78rem; line-height: 1.55; color: var(--muted); }
+.unreal-steps strong { color: var(--text); }
+.unreal-steps code { color: #a5f3fc; font-size: 0.76rem; }
+.unreal-steps pre {
+  margin: 0.35rem 0 0;
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(2, 5, 9, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+}
+.unreal-steps pre code { color: #cbd5e1; font-size: 0.72rem; line-height: 1.5; }
+
+.unreal-note { margin: 0.55rem 0 0; font-size: 0.72rem; line-height: 1.55; color: rgba(143, 166, 184, 0.8); }
+.unreal-note code { color: #a5f3fc; }
+
+.unreal-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.22rem;
+  max-height: 200px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  color: rgba(203, 213, 225, 0.85);
+}
+.unreal-log li { line-height: 1.45; }
+.unreal-log-empty { color: var(--muted); font-family: inherit; font-size: 0.75rem; }
+
+#unreal-status[data-tone='live'] {
+  border-color: rgba(163, 230, 53, 0.5);
+  color: #bef264;
+  background: rgba(40, 60, 10, 0.35);
+}
+#unreal-status[data-tone='warn'] { border-color: rgba(251, 191, 36, 0.45); color: #fcd34d; }
+#unreal-status[data-tone='error'] { border-color: rgba(251, 113, 133, 0.5); color: #fda4af; }
+
+@media (max-width: 900px) {
+  .unreal-grid { grid-template-columns: 1fr; }
+  .unreal { padding: 1.1rem; }
+}

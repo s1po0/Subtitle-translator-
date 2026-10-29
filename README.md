@@ -1,24 +1,50 @@
-# SUB//LATE — Subtitle Translator + Godot Engine Lab
+# SUB//LATE — Subtitle Translator · Godot host · Unreal Pixel Streaming player
 
 وەرگێڕی ژێرنووس (SRT / WebVTT) کە **تەواو لە وێبگەڕدا** کار دەکات، لەگەڵ ڕووکارێکی
-ڕیال-تایمی سینەمایی، و **Godot 4 ڕاستەقینە کە لێرە هۆست کراوە** (wasm + pck).
+ڕیال-تایمی سینەمایی، **Godot 4ـی ڕاستەقینە کە لێرە هۆست کراوە** (wasm + pck)، و
+**پلەیەری فەرمیی Unreal Engine Pixel Streaming**.
 
-A cinematic, browser-only subtitle translator, plus a working **Godot 4 web-export host**:
-drop your exported game zip and it plays inside this preview.
+A cinematic browser-only subtitle translator, a working **Godot 4 web-export host**, and
+**Epic's official Unreal Engine Pixel Streaming player** for any `ws://`/`wss://` session.
 
 ---
 
-## Unreal Engine یان Godot؟ (why Unreal cannot run here, and Godot can)
+## Unreal Engine: چۆن دەگاتە وێبگەڕ (Pixel Streaming)
+
+ئەدیسەر/بایناڕی Unreal لەم کۆنتەینەرەدا ناکرێت (بێ GPU، ~١٠٠ گێگابایت، هیچ exportێکی
+HTML5 لە 4.24ـەوە نییە). **بەڵام** یەک ڕێگای فەرمی هەیە کە ئێمە جێبەجێمان کردووە:
+**Pixel Streaming** — Unreal لەسەر ئامێرێکی GPU ڕەندەر دەکات و ڤیدیۆی WebRTC بۆ وێبگەڕ دەنێرێت.
 
 | | Unreal Engine | Godot 4 |
 | --- | --- | --- |
 | Official web export | ✗ removed after 4.24 | ✓ **Web** preset (WASM + WebGL2) |
-| Runs in this container | ✗ needs GPU + ~100 GB install | ✓ static files, no GPU needed on the server |
-| How it can reach a browser | Pixel Streaming from a GPU server | the browser *is* the runtime |
+| How it reaches a browser | **Pixel Streaming** (engine on a GPU box) | the browser *is* the runtime |
+| Needs a GPU *in this container* | no — the GPU lives wherever the engine runs | no |
 
-ئەم ژینگەیە کۆنتەینەرێکی Linuxـی بێ GPUـە، و ئەدیسەر/export templatesـی Unreal لە ڕێگای
-ئینتەرنێتەوە بەردەست نییە. Godot بە پێچەوانەوە دەتوانێت بۆ وێب export بکرێت و تەنها پێویستی بە
-فایلە ستاتیکەکان هەیە — بۆیە لێرە هۆست کراوە.
+### What is shipped here
+
+- **`/#unreal` and `/unreal.html`** — Epic's **official Pixel Streaming frontend**
+  (`@epicgames-ps/lib-pixelstreamingfrontend-ue5.5` + stock UI), lazily loaded, with:
+  connect bar for any `ws://` / `wss://` signalling server, live event log, quality/stats
+  panels, fullscreen, mouse/keyboard/touch/gamepad forwarding, and `?ws=…` deep links for
+  embedding a session anywhere.
+- **`unreal/`** — helper scripts and a full walkthrough:
+  - `start-signalling.sh` / `.ps1` — clone + run Epic's `PixelStreamingInfrastructure`
+    signalling server (`ws://localhost:8888`).
+  - `launch-unreal.sh` / `.ps1` — launch a `.uproject` in game mode with
+    `-PixelStreamingURL`, `-RenderOffScreen`, `-ForceRes`.
+  - `unreal/README.md` — local PC, cloud GPU, `wss://` tunnels (cloudflared/ngrok), TURN,
+    plus a troubleshooting table.
+- Four lines of code is all it takes to attach a session:
+
+  ```js
+  const lab = createUnrealLab({ container, urlInput, connectBtn, statusPill });
+  lab.connect('ws://localhost:8888');
+  ```
+
+> Honest scope: the player is real and complete — but it needs a **UE instance with a GPU**
+> somewhere (your PC, a cloud GPU box, or a studio server). Nothing in a 2-core container
+> can fake a frame of Unreal, so this is the only legitimate path, and it is fully wired up.
 
 ## Godot Engine Lab
 
@@ -63,7 +89,7 @@ cp -r /path/to/export/. public/godot/my-game/
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # http://localhost:5173   (unreal player: /unreal.html)
 npm test         # parser, zip reader, and end-to-end DOM tests
 npm run build    # static bundle in dist/ (includes public/godot)
 npm run preview  # serve the production build + upload API
@@ -102,6 +128,9 @@ src/subtitles.js          SRT/VTT parse, serialise, timestamps, CPS (pure, teste
 src/translate.js          providers (demo / MyMemory / LibreTranslate / LLM) + batching
 src/scene.js              three.js cinematic backdrop with bloom + adaptive quality
 src/godot-host.js         Godot lab: run bundled build, upload/list/delete exports
+src/unreal.js             Unreal Pixel Streaming player (Epic frontend, lazy-loaded)
+src/unreal-page.js        standalone /unreal.html player
+unreal/                   signalling-server + engine launch scripts and walkthrough
 server/zip.js             dependency-free zip reader + path hardening (tested)
 server/godot-host.js      Vite plugin: upload API + /godot-host static serving
 public/godot/…            bundled Godot 4 web export (CC0, see ATTRIBUTION.md)
@@ -116,3 +145,6 @@ test/                     node:test suites (parser, zip, jsdom end-to-end)
   server restarts, but not a fresh sandbox.
 - Hosting a *threaded* Godot web export would need COOP/COEP headers; the bundled CC0 demo is a
   non-threaded build, so it runs on plain HTTP.
+- The Unreal player ships no engine. Run `unreal/start-signalling.sh` + `unreal/launch-unreal.sh`
+  on a GPU machine, then connect from the page. HTTPS deployments need `wss://` (use the
+  cloudflared/ngrok tunnel described in `unreal/README.md`); `ws://localhost` stays allowed.

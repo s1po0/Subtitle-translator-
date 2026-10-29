@@ -206,14 +206,107 @@
         </div>
       </section>
 
+
+      <section class="unreal" id="unreal">
+        <header class="godot-head">
+          <div>
+            <p class="eyebrow">Unreal Engine · Pixel Streaming</p>
+            <h2>Real Unreal Engine, streamed into this page</h2>
+            <p class="lede">
+              This is Epic's <strong>official Pixel Streaming frontend</strong> — the exact player the
+              engine ships. UE renders on a machine with a GPU and streams WebRTC video here, so the
+              engine itself never has to run inside this container. Attach your own session below.
+            </p>
+          </div>
+          <span class="pill" id="unreal-status">idle</span>
+        </header>
+
+        <div class="unreal-grid">
+          <div class="unreal-stage">
+            <div class="unreal-frame-wrap">
+              <div id="unreal-player" class="unreal-idle">
+                <div class="unreal-idle-inner">
+                  <span class="unreal-mark" aria-hidden="true">UE</span>
+                  <p>No Unreal Engine session attached</p>
+                  <p class="unreal-idle-sub">
+                    Start UE with Pixel Streaming, then connect to its signalling server
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="unreal-connect">
+              <label class="control grow">
+                <span>Signalling server · ws://host:8888</span>
+                <input
+                  id="unreal-url"
+                  type="text"
+                  inputmode="url"
+                  spellcheck="false"
+                  autocomplete="off"
+                  placeholder="ws://localhost:8888"
+                  value="ws://localhost:8888"
+                />
+              </label>
+              <button class="primary-btn compact" id="unreal-connect" type="button">Connect</button>
+              <button class="ghost-btn compact" id="unreal-disconnect" type="button" disabled>
+                Disconnect
+              </button>
+              <a
+                class="ghost-btn compact link-btn"
+                id="unreal-standalone"
+                data-base="/unreal.html"
+                href="/unreal.html"
+                target="_blank"
+                rel="noopener"
+                >Standalone player ↗</a
+              >
+            </div>
+          </div>
+
+          <aside class="unreal-side">
+            <div class="unreal-card">
+              <h3>Run the engine somewhere with a GPU</h3>
+              <ol class="unreal-steps">
+                <li>
+                  Start the <strong>Signalling Server</strong> from Epic's
+                  <code>PixelStreamingInfrastructure</code>
+                  (defaults to <code>ws://localhost:8888</code>).
+                </li>
+                <li>
+                  Launch your project in game mode:
+                  <pre><code>UnrealEditor.exe MyGame.uproject -game \
+  -PixelStreamingURL=ws://127.0.0.1:8888 \
+  -RenderOffScreen -ResX=1920 -ResY=1080</code></pre>
+                </li>
+                <li>Paste the server URL above and press Connect.</li>
+              </ol>
+              <p class="unreal-note">
+                This page is served over HTTPS, so a remote server must use
+                <code>wss://</code>. Plain <code>ws://localhost</code> still works because browsers
+                treat loopback as secure. Helper scripts live in
+                <code>unreal/</code> in the repo.
+              </p>
+            </div>
+
+            <div class="unreal-card">
+              <h3>Event log</h3>
+              <ul class="unreal-log" id="unreal-log">
+                <li class="unreal-log-empty">Nothing yet — connect to a session to see the handshake.</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
       <section class="cards">
         <article class="card">
           <h2>Why not Unreal?</h2>
           <p>
             Unreal needs a GPU workstation, a ~100&nbsp;GB install and has no official HTML5 export
             since 4.24 — it cannot run inside a container like this one. The backdrop reproduces the
-            look with three.js; <a href="#godot">Godot</a>, which <em>does</em> export to WebAssembly,
-            is hosted for real in the Engine lab above.
+            look with three.js. Two real engines are wired up instead: <a href="#unreal">Unreal
+            Engine over Pixel Streaming</a> and <a href="#godot">Godot 4 in WebAssembly</a>.
           </p>
         </article>
         <article class="card">
