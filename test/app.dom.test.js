@@ -64,6 +64,30 @@ test('editing a cue clears the automatic badge', async () => {
   assert.match(badges, /edited/);
 });
 
+test('godot lab launches the bundled export on demand', async () => {
+  const frame = window.document.querySelector('#godot-frame');
+  const idle = window.document.querySelector('#godot-idle');
+  assert.equal(frame.hidden, true, 'nothing loads before a click');
+
+  window.document.querySelector('#godot-run').click();
+  await wait(50);
+
+  assert.equal(frame.hidden, false);
+  assert.equal(idle.hidden, true);
+  assert.match(frame.src, /\/godot\/dungeon-crawler\/index\.html/);
+  assert.equal(window.document.querySelector('#godot-reload').disabled, false);
+  assert.equal(window.document.querySelector('#godot-open').getAttribute('aria-disabled'), null);
+  assert.match(window.document.querySelector('#godot-status').textContent, /godot 4/);
+});
+
+test('godot build list renders the bundled build', async () => {
+  await wait(150);
+  const items = [...window.document.querySelectorAll('#godot-builds .godot-build')];
+  assert.ok(items.length >= 1);
+  assert.match(items[0].textContent, /Dungeon Crawler/);
+  assert.match(items[0].textContent, /built-in/);
+});
+
 test('clearing returns to the drop zone', async () => {
   window.document.querySelector('#clear-btn').click();
   await wait(20);

@@ -574,3 +574,156 @@ button:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* ---------- godot engine lab ---------- */
+
+.godot {
+  margin-top: 3rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  background: linear-gradient(180deg, rgba(12, 21, 32, 0.82), rgba(5, 9, 15, 0.92));
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.godot-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.godot-head h2 {
+  margin: 0.2rem 0 0.5rem;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  letter-spacing: -0.02em;
+}
+
+.godot-head .lede { margin: 0; font-size: 0.92rem; max-width: 60ch; }
+
+.godot-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+  gap: 1rem;
+}
+
+.godot-stage { display: grid; gap: 0.6rem; min-width: 0; }
+
+.godot-frame-wrap {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(120, 220, 255, 0.14);
+  background:
+    radial-gradient(70% 70% at 50% 40%, rgba(34, 211, 238, 0.09), transparent 70%),
+    #04070c;
+}
+
+.godot-frame-wrap.active { border-color: rgba(34, 211, 238, 0.4); }
+
+.godot-frame-wrap:fullscreen {
+  aspect-ratio: auto;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  border: none;
+}
+
+#godot-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #000;
+}
+
+.godot-idle {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.godot-idle p { margin: 0; color: var(--text); font-weight: 600; }
+.godot-idle .godot-idle-sub { color: var(--muted); font-size: 0.76rem; font-weight: 400; }
+
+.godot-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.link-btn { text-decoration: none; }
+.link-btn[aria-disabled='true'] { opacity: 0.5; pointer-events: none; }
+
+.godot-side { display: grid; gap: 0.7rem; align-content: start; min-width: 0; }
+
+.drop-zone.compact { padding: 1.1rem 0.9rem; }
+.drop-zone.compact .drop-icon { width: 36px; height: 36px; margin-bottom: 0.55rem; font-size: 0.9rem; }
+.drop-zone.compact .drop-title { font-size: 0.9rem; }
+.drop-zone.compact .drop-sub { font-size: 0.74rem; margin-bottom: 0.7rem; }
+
+.godot-builds-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 0.2rem;
+}
+
+.godot-builds {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.godot-build {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+  background: rgba(6, 12, 19, 0.6);
+}
+.godot-build.current { border-color: rgba(34, 211, 238, 0.42); background: rgba(12, 32, 42, 0.55); }
+
+.godot-build-meta { display: grid; gap: 0.1rem; min-width: 0; }
+.godot-build-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.godot-build-sub { font-size: 0.7rem; color: var(--muted); }
+
+.godot-build-actions { display: flex; gap: 0.3rem; flex: 0 0 auto; }
+.ghost-btn.tiny { padding: 0.3rem 0.6rem; font-size: 0.72rem; border-radius: 8px; }
+.ghost-btn.danger { border-color: rgba(251, 113, 133, 0.35); color: #fda4af; }
+.ghost-btn.danger:hover { border-color: rgba(251, 113, 133, 0.7); background: rgba(60, 12, 20, 0.5); }
+
+.godot-empty { font-size: 0.76rem; color: var(--muted); padding: 0.4rem 0.2rem; }
+
+.godot-note { margin: 0; font-size: 0.72rem; line-height: 1.55; color: rgba(143, 166, 184, 0.85); }
+
+@media (max-width: 900px) {
+  .godot-grid { grid-template-columns: 1fr; }
+  .godot { padding: 1.1rem; }
+}

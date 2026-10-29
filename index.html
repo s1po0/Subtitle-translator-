@@ -137,13 +137,83 @@
         </div>
       </section>
 
+      <section class="godot" id="godot">
+        <header class="godot-head">
+          <div>
+            <p class="eyebrow">Engine lab · Godot 4</p>
+            <h2>Godot, hosted right here</h2>
+            <p class="lede">
+              A real <strong>Godot 4 web export</strong> — wasm, pck, worker and all — served by this
+              preview and rendered by your browser's WebGL. Drop your own export zip and it gets
+              hosted next to it.
+            </p>
+          </div>
+          <span class="pill" id="godot-status">idle</span>
+        </header>
+
+        <div class="godot-grid">
+          <div class="godot-stage">
+            <div class="godot-frame-wrap" id="godot-frame-wrap">
+              <iframe
+                id="godot-frame"
+                title="Godot web export preview"
+                allow="fullscreen; autoplay; gamepad"
+                hidden
+              ></iframe>
+              <div class="godot-idle" id="godot-idle">
+                <p>Nothing running yet.</p>
+                <button class="primary-btn compact" id="godot-run" type="button">
+                  Run the Godot demo
+                </button>
+                <p class="godot-idle-sub">~14 MB wasm · loads on click, not on page load</p>
+              </div>
+            </div>
+            <div class="godot-toolbar">
+              <button class="ghost-btn compact" id="godot-reload" type="button" disabled>Reload</button>
+              <button class="ghost-btn compact" id="godot-fullscreen" type="button" disabled>
+                Fullscreen
+              </button>
+              <a class="ghost-btn compact link-btn" id="godot-open" href="#" target="_blank" rel="noopener" aria-disabled="true">
+                Open in new tab
+              </a>
+              <span class="spacer"></span>
+              <span class="counts" id="godot-url">—</span>
+            </div>
+          </div>
+
+          <aside class="godot-side">
+            <div class="drop-zone compact" id="godot-drop" tabindex="0" role="button">
+              <div class="drop-icon" aria-hidden="true">⇧</div>
+              <p class="drop-title">Drop a Godot web export .zip</p>
+              <p class="drop-sub">
+                Godot → Project → Export → <em>Web</em>, then zip the output folder
+              </p>
+              <button class="ghost-btn compact" id="godot-browse" type="button">Choose zip</button>
+            </div>
+
+            <div class="godot-builds-head">
+              <span>Hosted builds</span>
+              <span class="mono" id="godot-build-count">—</span>
+            </div>
+            <ul class="godot-builds" id="godot-builds">
+              <li class="godot-empty">Loading…</li>
+            </ul>
+            <p class="godot-note" id="godot-note">
+              Uploads live in this workspace (gitignored) and survive reloads while the preview
+              server runs. Only the newest few are kept.
+            </p>
+          </aside>
+        </div>
+      </section>
+
       <section class="cards">
         <article class="card">
           <h2>Why not Unreal?</h2>
           <p>
             Unreal needs a GPU workstation, a ~100&nbsp;GB install and has no official HTML5 export
-            since 4.24 — it cannot run inside a container like this one. This scene reproduces the
-            look with three.js: PBR materials, exponential fog, bloom and a cinematic camera rig.
+            since 4.24 — it cannot run inside a container like this one. The backdrop reproduces the
+            look with three.js; <a href="#godot">Godot</a>, which <em>does</em> export to WebAssembly,
+            is hosted for real in the Engine lab above.
           </p>
         </article>
         <article class="card">

@@ -7,6 +7,7 @@ import {
   charsPerSecond,
 } from './subtitles.js';
 import { LANGUAGES, PROVIDERS, translateCues } from './translate.js';
+import { initGodotHost } from './godot-host.js';
 
 const STORAGE_KEY = 'sublate.settings.v1';
 const RTL_LANGS = new Set(['ku', 'ckb', 'ar', 'fa', 'he', 'ur']);
@@ -609,6 +610,8 @@ function toast(message, kind = 'info', timeout = 6000) {
 function setStatus(message) {
   els.status.textContent = message;
 }
+
+initGodotHost({ toast, setStatus });
 
 window.addEventListener('beforeunload', (event) => {
   if (state.translating) {

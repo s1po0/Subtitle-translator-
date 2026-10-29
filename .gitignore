@@ -3,3 +3,6 @@ dist/
 .vite/
 *.log
 .DS_Store
+
+# uploaded Godot web exports (dev/preview host)
+.godot-hosts/
