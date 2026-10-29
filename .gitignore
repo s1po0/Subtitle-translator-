@@ -6,3 +6,6 @@ dist/
 
 # uploaded Godot web exports (dev/preview host)
 .godot-hosts/
+
+# Bundled Unreal Engine 4 HTML5 demo (third-party build, not redistributed)
+public/unreal4/

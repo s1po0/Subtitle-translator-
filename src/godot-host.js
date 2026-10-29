@@ -9,13 +9,26 @@
  * wasm never loads just because someone opened the subtitle tool.
  */
 
-const BUNDLED = {
-  slug: 'dungeon-crawler',
-  name: '2D Dungeon Crawler Example (CC0)',
-  entry: 'index.html',
-  url: '/godot/dungeon-crawler/index.html',
-  builtin: true,
-};
+const BUNDLED = [
+  {
+    slug: 'unreal4-janken',
+    name: 'Unreal Engine 4 · HTML5 / WebAssembly',
+    entry: 'index.html',
+    url: '/unreal4/janken/index.html',
+    builtin: true,
+    engine: 'unreal',
+    size: 57500000,
+  },
+  {
+    slug: 'dungeon-crawler',
+    name: 'Godot 4 · 2D Dungeon Crawler (CC0)',
+    entry: 'index.html',
+    url: '/godot/dungeon-crawler/index.html',
+    builtin: true,
+    engine: 'godot',
+    size: 14800000,
+  },
+];
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -53,6 +66,7 @@ export function initGodotHost({ toast, setStatus } = {}) {
   let builds = [];
   let current = null;
   let apiOnline = true;
+  let bundled = [...BUNDLED];
 
   function setStatusPill(text) {
     if (status) status.textContent = text;
@@ -70,7 +84,13 @@ export function initGodotHost({ toast, setStatus } = {}) {
     openLink.href = url;
     openLink.removeAttribute('aria-disabled');
     urlLabel.textContent = build.builtin ? 'bundled export' : `/godot-host/${build.slug}`;
-    setStatusPill(build.builtin ? 'godot 4 · running' : `godot 4 · ${build.slug}`);
+    setStatusPill(
+      build.builtin
+        ? build.engine === 'unreal'
+          ? 'unreal 4 · wasm'
+          : 'godot 4 · wasm'
+        : `hosted · ${build.slug}`,
+    );
     setStatus?.(`godot: ${build.name ?? build.slug}`);
     wrap.classList.add('active');
   }
@@ -79,7 +99,7 @@ export function initGodotHost({ toast, setStatus } = {}) {
     if (!frame.hidden) setStatusPill('godot 4 · loaded');
   });
 
-  $('#godot-run').addEventListener('click', () => play(BUNDLED));
+  $('#godot-run').addEventListener('click', () => play(bundled[0]));
 
   reloadBtn.addEventListener('click', () => {
     if (current) play(current);
@@ -181,7 +201,7 @@ export function initGodotHost({ toast, setStatus } = {}) {
 
   function renderBuilds(max = 6) {
     buildsList.innerHTML = '';
-    const all = [BUNDLED, ...builds.map((build) => ({ ...build }))];
+    const all = [...bundled, ...builds.map((build) => ({ ...build }))];
 
     for (const build of all) {
       const item = document.createElement('li');
@@ -196,7 +216,7 @@ export function initGodotHost({ toast, setStatus } = {}) {
       const sub = document.createElement('span');
       sub.className = 'godot-build-sub';
       sub.textContent = build.builtin
-        ? `built-in · ${formatBytes(14800000)}`
+        ? `${build.engine === 'unreal' ? 'UE4 wasm' : 'Godot wasm'} · ${formatBytes(build.size)}`
         : `${build.files ?? '?'} files · ${formatBytes(build.bytes)}`;
       meta.append(title, sub);
 
@@ -244,7 +264,7 @@ export function initGodotHost({ toast, setStatus } = {}) {
     buildCount.textContent = apiOnline ? `${builds.length} / ${max}` : 'offline';
     if (!builds.length && apiOnline) {
       note.textContent =
-        'No uploads yet. Export your game with the Web preset, zip the output folder, then drop it here.';
+        'No uploads yet. Export with Godot’s Web preset or UE4’s HTML5 target, zip the output folder, then drop it here.';
     }
   }
 

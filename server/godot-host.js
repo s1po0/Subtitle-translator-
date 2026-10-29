@@ -241,14 +241,19 @@ function createHandler(root) {
 }
 
 /** Serve bundled exports from `public/` with correct MIME types for .pck/.wasm. */
-export function bundledExports({ publicDir = 'public', prefix = '/godot/' } = {}) {
+export function bundledExports({ publicDir = 'public', prefixes = ['/godot/', '/unreal4/'] } = {}) {
   const absolute = path.resolve(process.cwd(), publicDir);
-  const handler = async function serveBundledGodot(req, res, next) {
+  const handler = async function serveBundledExports(req, res, next) {
     const pathname = new URL(req.url ?? '/', 'http://localhost').pathname;
-    if (!pathname.startsWith(prefix)) return next();
+    if (!prefixes.some((prefix) => pathname.startsWith(prefix))) return next();
     const relative = safePath(decodeURIComponent(pathname));
     const filePath = path.join(absolute, relative);
     if (!filePath.startsWith(absolute + path.sep)) return next();
+    // Let the directory itself fall through to Vite's index.html handling.
+    if (/\/index\.html?$/i.test(filePath) || pathname.endsWith('/')) {
+      const shipped = await stat(filePath).catch(() => null);
+      if (shipped?.isDirectory()) return next();
+    }
     const served = await serveStatic(res, filePath, req.method);
     return served ? undefined : next();
   };

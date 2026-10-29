@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unreal Engine 4 · HTML5 / WebAssembly build</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: #04060b; color: #e8f4fb;
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+      body { display: grid; grid-template-rows: auto 1fr auto; }
+
+      header {
+        display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+        padding: 0.6rem 0.9rem; border-bottom: 1px solid rgba(120, 220, 255, 0.16);
+        background: rgba(8, 14, 21, 0.92);
+      }
+      .mark { font-weight: 800; letter-spacing: 0.16em; font-size: 0.74rem; color: #22d3ee; }
+      .tag { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8fa6b8;
+        border: 1px solid rgba(120, 220, 255, 0.2); border-radius: 999px; padding: 0.2rem 0.55rem; }
+      header a.back {
+        margin-left: auto; font-size: 0.78rem; font-weight: 600; color: #e8f4fb; text-decoration: none;
+        border: 1px solid rgba(120, 220, 255, 0.28); border-radius: 9px; padding: 0.38rem 0.7rem;
+        background: rgba(9, 17, 26, 0.8);
+      }
+      header a.back:hover { border-color: #22d3ee; }
+
+      #mainarea {
+        position: relative; min-height: 0; display: grid; place-items: center;
+        background: radial-gradient(70% 70% at 50% 30%, rgba(34, 211, 238, 0.08), transparent 70%);
+        overflow: hidden;
+      }
+      canvas#canvas {
+        display: none; max-width: 100%; max-height: 100%; outline: none;
+        background: #000; box-shadow: 0 30px 90px -40px #000;
+      }
+      canvas#canvas:focus-visible { outline: 2px solid #22d3ee; }
+
+      /* status / error dialogs injected by the UE4 bootstrap */
+      .centered-axis-xy { position: absolute; inset: auto; }
+      .alert {
+        margin: 0; padding: 0.7rem 0.95rem; border-radius: 10px; font-size: 0.83rem;
+        background: rgba(9, 17, 26, 0.95); border: 1px solid rgba(120, 220, 255, 0.22); color: #e8f4fb;
+        max-width: min(560px, 90vw); line-height: 1.5;
+      }
+      .alert-danger { border-color: rgba(251, 113, 133, 0.55); color: #fecdd3; }
+      .alert-warning { border-color: rgba(251, 191, 36, 0.45); color: #fde68a; }
+      #compilingmessage { text-align: center; }
+      #loadTasks { font-size: 0.78rem; color: #8fa6b8; margin-top: 0.3rem; }
+
+      #logwindow {
+        position: fixed; right: 0.9rem; bottom: 4.4rem; width: min(520px, 92vw); max-height: 38vh;
+        overflow: auto; padding: 0.7rem 0.9rem; border-radius: 10px; font-size: 0.72rem;
+        background: rgba(4, 8, 13, 0.96); border: 1px solid rgba(120, 220, 255, 0.2);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #cbd5e1; white-space: pre-wrap;
+      }
+      #logwindow h4 { margin: 0.15rem 0; font-weight: 500; }
+      .texthalf.text-normal.jumbotron { margin: 0; }
+
+      #buttonrow {
+        display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; justify-content: center;
+        padding: 0.6rem 0.9rem; border-top: 1px solid rgba(120, 220, 255, 0.14);
+        background: rgba(8, 14, 21, 0.92);
+      }
+      #buttonrow button {
+        font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: #e8f4fb;
+        background: rgba(9, 17, 26, 0.85); border: 1px solid rgba(120, 220, 255, 0.28);
+        border-radius: 9px; padding: 0.4rem 0.75rem;
+      }
+      #buttonrow button:hover { border-color: #22d3ee; background: rgba(14, 26, 38, 0.9); }
+      #clear_indexeddb { display: none; }
+      .hint { font-size: 0.7rem; color: #64748b; margin-left: 0.3rem; }
+      .row { display: contents; }
+      .text-center { text-align: center; }
+      .btn-primary { }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="mark">UNREAL ENGINE 4</span>
+      <span class="tag">HTML5 · Emscripten · WebAssembly</span>
+      <a class="back" href="/#unreal">← Back to SUB//LATE</a>
+    </header>
+
+    <div id="mainarea">
+      <div
+        class="alert alert-warning centered-axis-xy"
+        role="alert"
+        id="compilingmessage"
+        style="display: none; min-height: 20px"
+      >
+        <div>Starting Unreal Engine…</div>
+        <div id="loadTasks"></div>
+      </div>
+
+      <canvas
+        tabindex="0"
+        id="canvas"
+        class="emscripten"
+        oncontextmenu="event.preventDefault()"
+      ></canvas>
+    </div>
+
+    <div class="row buttonarea text-center" id="buttonrow">
+      <button type="button" onclick="try { Module['pauseMainLoop'](); } catch (e) { console.error(e); }">
+        Pause
+      </button>
+      <button type="button" onclick="try { Module['resumeMainLoop'](); } catch (e) { console.error(e); }">
+        Resume
+      </button>
+      <button
+        type="button"
+        onclick="var w = document.getElementById('logwindow'); w.style.display = w.style.display ? '' : 'none';"
+      >
+        Toggle log
+      </button>
+      <button type="button" id="clear_indexeddb" onclick="try { deleteIndexedDBStorage(); } catch (e) { console.error(e); }">
+        Clear IndexedDB
+      </button>
+      <button type="button" id="fullscreen_request">Fullscreen</button>
+      <span class="hint">first load decodes a 46 MB wasm build — later loads come from cache</span>
+    </div>
+
+    <div class="texthalf text-normal jumbotron" id="logwindow" style="display: none"></div>
+
+    <script src="vendor/jquery.min.js"></script>
+    <script>
+      document.getElementById('fullscreen_request').addEventListener('click', function () {
+        var target = document.documentElement;
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (target.requestFullscreen) target.requestFullscreen().catch(function () {});
+      });
+      // UE4 shows this button when an IndexedDB/WebGL error occurs.
+      window.addEventListener(
+        'error',
+        function () {
+          var btn = document.getElementById('clear_indexeddb');
+          if (btn) btn.style.display = 'inline-block';
+        },
+        false,
+      );
+    </script>
+    <script src="JankenGame-HTML5-Shipping.UE4.js"></script>
+  </body>
+</html>

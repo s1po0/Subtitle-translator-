@@ -140,12 +140,13 @@
       <section class="godot" id="godot">
         <header class="godot-head">
           <div>
-            <p class="eyebrow">Engine lab · Godot 4</p>
-            <h2>Godot, hosted right here</h2>
+            <p class="eyebrow">Engine lab · Unreal 4 &amp; Godot 4</p>
+            <h2>Real engines, hosted right here</h2>
             <p class="lede">
-              A real <strong>Godot 4 web export</strong> — wasm, pck, worker and all — served by this
-              preview and rendered by your browser's WebGL. Drop your own export zip and it gets
-              hosted next to it.
+              Two genuine engine builds served by this preview and executed by your browser's
+              WebAssembly + WebGL: an <strong>Unreal Engine 4 HTML5 build</strong> (the engine itself,
+              compiled with Emscripten) and a <strong>Godot 4 web export</strong>. Drop your own export
+              zip — Godot Web or UE4 HTML5 — and it gets hosted next to them.
             </p>
           </div>
           <span class="pill" id="godot-status">idle</span>
@@ -163,9 +164,9 @@
               <div class="godot-idle" id="godot-idle">
                 <p>Nothing running yet.</p>
                 <button class="primary-btn compact" id="godot-run" type="button">
-                  Run the Godot demo
+                  Run Unreal Engine 4 (wasm)
                 </button>
-                <p class="godot-idle-sub">~14 MB wasm · loads on click, not on page load</p>
+                <p class="godot-idle-sub">46 MB wasm · loads on click, not on page load</p>
               </div>
             </div>
             <div class="godot-toolbar">
@@ -184,9 +185,9 @@
           <aside class="godot-side">
             <div class="drop-zone compact" id="godot-drop" tabindex="0" role="button">
               <div class="drop-icon" aria-hidden="true">⇧</div>
-              <p class="drop-title">Drop a Godot web export .zip</p>
+              <p class="drop-title">Drop an engine export .zip</p>
               <p class="drop-sub">
-                Godot → Project → Export → <em>Web</em>, then zip the output folder
+                Godot → Export → <em>Web</em>, or UE4 → <em>HTML5</em>, then zip the output folder
               </p>
               <button class="ghost-btn compact" id="godot-browse" type="button">Choose zip</button>
             </div>
@@ -199,8 +200,9 @@
               <li class="godot-empty">Loading…</li>
             </ul>
             <p class="godot-note" id="godot-note">
-              Uploads live in this workspace (gitignored) and survive reloads while the preview
-              server runs. Only the newest few are kept.
+              The Unreal build is a real UE4 HTML5 export running from this workspace — the engine
+              binary is Epic's, so it stays out of git (see <code>public/unreal4/</code>). Uploads
+              live in this workspace too and only the newest few are kept.
             </p>
           </aside>
         </div>
@@ -285,7 +287,9 @@
                 This page is served over HTTPS, so a remote server must use
                 <code>wss://</code>. Plain <code>ws://localhost</code> still works because browsers
                 treat loopback as secure. Helper scripts live in
-                <code>unreal/</code> in the repo.
+                <code>unreal/</code> in the repo. No GPU handy? The
+                <a href="#godot">Engine lab</a> above runs a real
+                <strong>UE4 HTML5/WebAssembly</strong> build with no streaming at all.
               </p>
             </div>
 

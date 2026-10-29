@@ -1,15 +1,47 @@
-# SUB//LATE — Subtitle Translator · Godot host · Unreal Pixel Streaming player
+# SUB//LATE — Subtitle Translator · Unreal Engine & Godot hosts
 
 وەرگێڕی ژێرنووس (SRT / WebVTT) کە **تەواو لە وێبگەڕدا** کار دەکات، لەگەڵ ڕووکارێکی
-ڕیال-تایمی سینەمایی، **Godot 4ـی ڕاستەقینە کە لێرە هۆست کراوە** (wasm + pck)، و
-**پلەیەری فەرمیی Unreal Engine Pixel Streaming**.
+ڕیال-تایمی سینەمایی، **Unreal Engine 4ـی ڕاستەقینە بە WebAssembly هۆست کراوە**،
+**Godot 4** (wasm + pck)، و **پلەیەری فەرمیی UE5 Pixel Streaming**.
 
-A cinematic browser-only subtitle translator, a working **Godot 4 web-export host**, and
-**Epic's official Unreal Engine Pixel Streaming player** for any `ws://`/`wss://` session.
+A cinematic browser-only subtitle translator plus a real **engine lab**: a genuine **UE4
+HTML5/WebAssembly** build running in the tab, a **Godot 4** web export, and **Epic's official
+UE5 Pixel Streaming player** for any `ws://`/`wss://` session.
 
 ---
 
-## Unreal Engine: چۆن دەگاتە وێبگەڕ (Pixel Streaming)
+## Unreal Engine لێرە هۆست کراوە — بە سێ شێوە
+
+1. **UE4 HTML5 / WebAssembly** (ڕاستەقینە، بێ GPU، لەم پێشبینینەدا کار دەکات) —
+   buildێکی ڕاستەقینەی **Unreal Engine 4** کە بە Emscripten بۆ wasm پێکهاتووە، لە
+   `/unreal4/janken/` هۆست کراوە و لە **Engine lab** بە کلیک دەکرێتەوە.
+   دابەزاندنی: `npm run unreal:demo` (فایلەکانی Epic لە gitدا نین).
+2. **UE5 Pixel Streaming** — پلەیەری فەرمی Epic؛ Unreal لەسەر ئامێرێکی GPU ڕەندەر دەکات
+   و ڤیدیۆ بۆ وێبگەڕ دەنێرێت (بەشی خوارەوە).
+3. **Exportـی خۆت** — zipـێکی UE4 HTML5 یان Godot Web فڕێ بدە سەر drop zoneـەی Engine lab.
+
+| ڕێگا | پێویستی بە GPU لێرە | چی دەبینیت |
+| --- | --- | --- |
+| UE4 HTML5 wasm | ✗ | یارییەکی UE4 ڕاستەقینە لە ناو تابەکەدا |
+| UE5 Pixel Streaming | ✗ (GPU لە لای خۆت/کڵاود) | ستریمی زیندووی UE5 |
+| Godot 4 wasm | ✗ | یارییەکی Godot 4 ڕاستەقینە |
+
+### UE4 HTML5 details
+
+```bash
+npm run unreal:demo     # downloads + verifies the export into public/unreal4/janken/
+# → http://localhost:5173/unreal4/janken/index.html  (or the Engine lab)
+```
+
+- Real engine: Emscripten 1.38.20, `UE4Game-HTML5-Shipping.wasm` (46 MB) +
+  `JankenGame-HTML5-Shipping.data` (11 MB) + bootstrap JS.
+- No threads → no `SharedArrayBuffer`, so it runs on any static host without COOP/COEP.
+- The shell page is ours (`scripts/unreal4-demo.html`), self-contained: no CDN, vendored
+  jQuery, dark UI, fullscreen/log/pause controls.
+- **Not committed**: engine binaries belong to Epic / the sample's author, so `public/unreal4/`
+  is gitignored and produced by the script. Replace it with your own export before deploying.
+
+## Unreal Engine 5: چۆن دەگاتە وێبگەڕ (Pixel Streaming)
 
 ئەدیسەر/بایناڕی Unreal لەم کۆنتەینەرەدا ناکرێت (بێ GPU، ~١٠٠ گێگابایت، هیچ exportێکی
 HTML5 لە 4.24ـەوە نییە). **بەڵام** یەک ڕێگای فەرمی هەیە کە ئێمە جێبەجێمان کردووە:
@@ -42,9 +74,10 @@ HTML5 لە 4.24ـەوە نییە). **بەڵام** یەک ڕێگای فەرمی �
   lab.connect('ws://localhost:8888');
   ```
 
-> Honest scope: the player is real and complete — but it needs a **UE instance with a GPU**
-> somewhere (your PC, a cloud GPU box, or a studio server). Nothing in a 2-core container
-> can fake a frame of Unreal, so this is the only legitimate path, and it is fully wired up.
+> Honest scope: this player streams a **UE5** session, so that session needs a GPU somewhere
+> (your PC, a cloud GPU box, or a studio server) — a 2-core container cannot render UE5.
+> If you have no GPU at all, use the **UE4 HTML5/WebAssembly** build above: it is the real
+> engine compiled to wasm and runs entirely in the browser tab.
 
 ## Godot Engine Lab
 
@@ -127,13 +160,16 @@ src/main.js               UI state, cue editor, translation + export wiring
 src/subtitles.js          SRT/VTT parse, serialise, timestamps, CPS (pure, tested)
 src/translate.js          providers (demo / MyMemory / LibreTranslate / LLM) + batching
 src/scene.js              three.js cinematic backdrop with bloom + adaptive quality
-src/godot-host.js         Godot lab: run bundled build, upload/list/delete exports
+src/godot-host.js         Engine lab: UE4/Godot builds, upload/list/delete exports
 src/unreal.js             Unreal Pixel Streaming player (Epic frontend, lazy-loaded)
 src/unreal-page.js        standalone /unreal.html player
 unreal/                   signalling-server + engine launch scripts and walkthrough
+scripts/fetch-unreal4-demo.mjs   downloads the UE4 HTML5 wasm build (gitignored output)
+scripts/unreal4-demo.html        self-contained shell page for that build
 server/zip.js             dependency-free zip reader + path hardening (tested)
 server/godot-host.js      Vite plugin: upload API + /godot-host static serving
 public/godot/…            bundled Godot 4 web export (CC0, see ATTRIBUTION.md)
+public/unreal4/…          UE4 HTML5 build, downloaded on demand (gitignored)
 test/                     node:test suites (parser, zip, jsdom end-to-end)
 ```
 
@@ -145,6 +181,8 @@ test/                     node:test suites (parser, zip, jsdom end-to-end)
   server restarts, but not a fresh sandbox.
 - Hosting a *threaded* Godot web export would need COOP/COEP headers; the bundled CC0 demo is a
   non-threaded build, so it runs on plain HTTP.
-- The Unreal player ships no engine. Run `unreal/start-signalling.sh` + `unreal/launch-unreal.sh`
+- `public/unreal4/` is not in git; run `npm run unreal:demo` after cloning (needs outbound
+  access to api.github.com). A deployed static build must include your own engine export.
+- The Unreal 5 player ships no engine. Run `unreal/start-signalling.sh` + `unreal/launch-unreal.sh`
   on a GPU machine, then connect from the page. HTTPS deployments need `wss://` (use the
   cloudflared/ngrok tunnel described in `unreal/README.md`); `ws://localhost` stays allowed.

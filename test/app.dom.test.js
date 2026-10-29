@@ -64,7 +64,7 @@ test('editing a cue clears the automatic badge', async () => {
   assert.match(badges, /edited/);
 });
 
-test('godot lab launches the bundled export on demand', async () => {
+test('engine lab launches the bundled Unreal 4 build on demand', async () => {
   const frame = window.document.querySelector('#godot-frame');
   const idle = window.document.querySelector('#godot-idle');
   assert.equal(frame.hidden, true, 'nothing loads before a click');
@@ -74,18 +74,25 @@ test('godot lab launches the bundled export on demand', async () => {
 
   assert.equal(frame.hidden, false);
   assert.equal(idle.hidden, true);
-  assert.match(frame.src, /\/godot\/dungeon-crawler\/index\.html/);
+  assert.match(frame.src, /\/unreal4\/janken\/index\.html/);
   assert.equal(window.document.querySelector('#godot-reload').disabled, false);
   assert.equal(window.document.querySelector('#godot-open').getAttribute('aria-disabled'), null);
-  assert.match(window.document.querySelector('#godot-status').textContent, /godot 4/);
+  assert.match(window.document.querySelector('#godot-status').textContent, /unreal 4/);
 });
 
-test('godot build list renders the bundled build', async () => {
+test('engine list renders both bundled engines and can switch to Godot', async () => {
   await wait(150);
   const items = [...window.document.querySelectorAll('#godot-builds .godot-build')];
-  assert.ok(items.length >= 1);
-  assert.match(items[0].textContent, /Dungeon Crawler/);
-  assert.match(items[0].textContent, /built-in/);
+  assert.ok(items.length >= 2);
+  assert.match(items[0].textContent, /Unreal Engine 4/);
+  assert.match(items[1].textContent, /Godot 4/);
+  assert.match(items[1].textContent, /Dungeon Crawler/);
+
+  items[1].querySelector('button').click();
+  await wait(80);
+  const frame = window.document.querySelector('#godot-frame');
+  assert.match(frame.src, /\/godot\/dungeon-crawler\/index\.html/);
+  assert.match(window.document.querySelector('#godot-status').textContent, /godot 4/);
 });
 
 test('unreal lab validates the URL and fails gracefully without WebRTC', async () => {
